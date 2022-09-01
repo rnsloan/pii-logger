@@ -1,10 +1,16 @@
 # PII Logger
 
-To test Personally Identifiable Information redacting in logs.
+To test Personally Identifiable Information redacting in logs. Go ports of the [faker library](https://github.com/faker-js/faker) have limited locale support.
 
 ## Usage
 
 `go run ./cmd/main.go`
+
+### Commands
+
+`--delay` the time between outputs. Default: 5
+
+## Development
 
 `go test ./...`
 
@@ -46,10 +52,3 @@ To test Personally Identifiable Information redacting in logs.
   - tax number
   - vehicle registration number
   - medical numbers
-  - 
-
-
-### Format
-- entity name
-  - local
-      - entries
