@@ -1,6 +1,6 @@
 # PII Logger
 
-To test Personally Identifiable Information filtering in logs.
+To test Personally Identifiable Information redacting in logs.
 
 ## Usage
 
