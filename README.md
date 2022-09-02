@@ -16,12 +16,10 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 ## TODO?
 
-- delay between messages
-- just entities
-- output transformer
-- natural language
+- format entities e.g '04## ### ###'
 - entity configuration
-- entity locale support
+- natural language
+- limit repeating the same entities
 - load your own entities
 ## Entities
 

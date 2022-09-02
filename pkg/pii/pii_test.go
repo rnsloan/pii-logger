@@ -30,3 +30,11 @@ func TestEntitiesToml(t *testing.T) {
 		t.Errorf("config.Phone.EnAU[0] expected phone number got: %s", config.Phone.EnAU[0])
 	}
 }
+
+func TestWrite(t *testing.T) {
+	_, err := Write("entities.toml")
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+}
