@@ -63,24 +63,33 @@ func getEntityNames(entities Entities) []string {
 	return entityNames
 }
 
-func Write(entitiesFilePath string) (string, error) {
-	locale := "EnAU"
-	entities, err := getEntities(entitiesFilePath)
+func Initilise(entitiesFilePath string) func() (string, error) {
+	var entitiesCache Entities
+	var entitiesNameCache []string
 
-	if err != nil {
-		return "", err
+	return func() (string, error) {
+		locale := "EnAU"
+
+		if len(entitiesCache) == 0 || len(entitiesNameCache) == 0 {
+			entities, err := getEntities(entitiesFilePath)
+			entitiesCache = entities
+
+			if err != nil {
+				return "", err
+			}
+
+			entitiesNameCache = getEntityNames(entitiesCache)
+		}
+
+		source := rand.NewSource(time.Now().UnixNano())
+		r := rand.New(source)
+
+		entityIndex := r.Intn(len(entitiesNameCache))
+		randomEntity := entitiesNameCache[entityIndex]
+
+		entityItems := entitiesCache[randomEntity][locale]
+		itemIndex := r.Intn(len(entityItems))
+
+		return entityItems[itemIndex], nil
 	}
-
-	entityNames := getEntityNames(entities)
-
-	source := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(source)
-
-	entityIndex := r.Intn(len(entityNames))
-	randomEntity := entityNames[entityIndex]
-
-	entityItems := entities[randomEntity][locale]
-	itemIndex := r.Intn(len(entityItems))
-
-	return entityItems[itemIndex], nil
 }

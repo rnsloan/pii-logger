@@ -32,7 +32,9 @@ func TestEntitiesToml(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	_, err := Write("entities.toml")
+	write := Initilise("entities.toml")
+
+	_, err := write()
 
 	if err != nil {
 		t.Errorf("%v", err)

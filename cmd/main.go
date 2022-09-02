@@ -16,7 +16,9 @@ func main() {
 
 	ticker := time.NewTicker(time.Second * time.Duration(*delay))
 
-	item, err := pii.Write(entitiesFilePath)
+	write := pii.Initilise(entitiesFilePath)
+
+	item, err := write()
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -26,7 +28,7 @@ func main() {
 	fmt.Println(item)
 
 	for range ticker.C {
-		item, err := pii.Write(entitiesFilePath)
+		item, err := write()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
