@@ -25,14 +25,14 @@ func TestEntitiesToml(t *testing.T) {
 		}
 	}
 
-	match, _ := regexp.MatchString("^0[0-9]+", config.Phone.EnAU[0])
+	match, _ := regexp.MatchString("^0[0-9]+", config.Phone.ENAU[0])
 	if !match {
-		t.Errorf("config.Phone.EnAU[0] expected phone number got: %s", config.Phone.EnAU[0])
+		t.Errorf("config.Phone.EnAU[0] expected phone number got: %s", config.Phone.ENAU[0])
 	}
 }
 
 func TestWrite(t *testing.T) {
-	write := Initilise("entities.toml")
+	write := Initilise("entities.toml", "en-AU")
 
 	_, err := write()
 

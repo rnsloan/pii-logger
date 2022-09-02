@@ -8,7 +8,8 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 ### Commands
 
-`--delay` the time between outputs. Default: 5
+`--delay` the time in seconds between outputs. Default: `5`
+`--locale` the time between outputs. Default: `en-AU`
 
 ## Development
 
@@ -16,11 +17,10 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 ## TODO?
 
+- load your own entities
 - format entities e.g '04## ### ###'
-- entity configuration
 - natural language
 - limit repeating the same entities
-- load your own entities
 ## Entities
 
 [https://cloud.google.com/dialogflow/es/docs/reference/system-entities](https://cloud.google.com/dialogflow/es/docs/reference/system-entities)

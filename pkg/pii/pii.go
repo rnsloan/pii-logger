@@ -3,6 +3,7 @@ package pii
 import (
 	"encoding/json"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -11,7 +12,7 @@ import (
 type Entities = map[string]map[string][]string
 
 type Locale struct {
-	EnAU []string `toml:"en-AU"`
+	ENAU []string `toml:"en-AU"`
 }
 
 type Config struct {
@@ -63,12 +64,19 @@ func getEntityNames(entities Entities) []string {
 	return entityNames
 }
 
-func Initilise(entitiesFilePath string) func() (string, error) {
+// 'en-AU' -> 'ENAU'
+func formatLocale(locale string) string {
+	converted := strings.ReplaceAll(locale, "-", "")
+	converted = strings.ToUpper(converted)
+	return converted
+}
+
+func Initilise(entitiesFilePath string, loc string) func() (string, error) {
 	var entitiesCache Entities
 	var entitiesNameCache []string
 
 	return func() (string, error) {
-		locale := "EnAU"
+		locale := formatLocale(loc)
 
 		if len(entitiesCache) == 0 || len(entitiesNameCache) == 0 {
 			entities, err := getEntities(entitiesFilePath)
