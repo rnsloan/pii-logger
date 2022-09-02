@@ -10,6 +10,7 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 `--delay` the time in seconds between outputs. Default: `5`
 `--locale` the time between outputs. Default: `en-AU`
+`--entitiesFilePath` the time between outputs. Default: `./pkg/pii/entities.toml`
 
 ## Development
 
@@ -17,10 +18,9 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 ## TODO?
 
-- load your own entities
 - format entities e.g '04## ### ###'
 - natural language
-- limit repeating the same entities
+- reduce repeating the same entities
 ## Entities
 
 [https://cloud.google.com/dialogflow/es/docs/reference/system-entities](https://cloud.google.com/dialogflow/es/docs/reference/system-entities)
