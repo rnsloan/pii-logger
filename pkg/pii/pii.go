@@ -3,6 +3,7 @@ package pii
 import (
 	"encoding/json"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 type Entities = map[string]map[string][]string
-
+type EntitiesIndexCache = map[string]map[int]bool
 type Locale struct {
 	ENAU []string `toml:"en-AU"`
 }
@@ -39,16 +40,22 @@ func structToMap(config Config) (Entities, error) {
 
 func getEntities(entitiesFilePath string) (Entities, error) {
 	var config Config
-	_, err := toml.DecodeFile(entitiesFilePath, &config)
+	_, err := os.Open(entitiesFilePath)
 
 	if err != nil {
 		return nil, err
 	}
 
-	entities, err := structToMap(config)
+	_, error := toml.DecodeFile(entitiesFilePath, &config)
 
-	if err != nil {
-		return nil, err
+	if error != nil {
+		return nil, error
+	}
+
+	entities, error := structToMap(config)
+
+	if error != nil {
+		return nil, error
 	}
 
 	return entities, nil
@@ -56,6 +63,7 @@ func getEntities(entitiesFilePath string) (Entities, error) {
 
 func getEntityNames(entities Entities) []string {
 	entityNames := make([]string, len(entities))
+
 	i := 0
 	for k := range entities {
 		entityNames[i] = k
@@ -71,32 +79,55 @@ func formatLocale(locale string) string {
 	return converted
 }
 
-func Initilise(entitiesFilePath string, loc string) func() (string, error) {
+func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesItemLength int) int {
+	source := rand.NewSource(time.Now().UnixNano())
+	r := rand.New(source)
+
+	if _, ok := cache[entityName]; !ok {
+		cache[entityName] = make(map[int]bool)
+	}
+
+	// clear cache if it contains 75%+ of available entity items
+	if float32(len(cache[entityName]))/float32(entitiesItemLength) >= .75 {
+		cache[entityName] = make(map[int]bool)
+	}
+
+	index := r.Intn(entitiesItemLength)
+
+	if _, ok := cache[entityName][index]; !ok {
+		cache[entityName][index] = true
+		return index
+	} else {
+		return getRandomItemIndex(cache, entityName, entitiesItemLength)
+	}
+}
+
+func Initilise(entitiesFilePath, loc string) func() (string, error) {
 	var entitiesCache Entities
 	var entitiesNameCache []string
+	entitiesIndexCache := make(map[string]map[int]bool)
 
 	return func() (string, error) {
 		locale := formatLocale(loc)
+		source := rand.NewSource(time.Now().UnixNano())
+		r := rand.New(source)
 
 		if len(entitiesCache) == 0 || len(entitiesNameCache) == 0 {
 			entities, err := getEntities(entitiesFilePath)
-			entitiesCache = entities
 
 			if err != nil {
 				return "", err
 			}
 
+			entitiesCache = entities
 			entitiesNameCache = getEntityNames(entitiesCache)
 		}
-
-		source := rand.NewSource(time.Now().UnixNano())
-		r := rand.New(source)
 
 		entityIndex := r.Intn(len(entitiesNameCache))
 		randomEntity := entitiesNameCache[entityIndex]
 
 		entityItems := entitiesCache[randomEntity][locale]
-		itemIndex := r.Intn(len(entityItems))
+		itemIndex := getRandomItemIndex(entitiesIndexCache, randomEntity, len(entityItems))
 
 		return entityItems[itemIndex], nil
 	}

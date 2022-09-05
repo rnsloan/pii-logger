@@ -1,12 +1,48 @@
 package pii
 
 import (
+	"os"
+	"reflect"
 	"regexp"
 	"testing"
 
 	"github.com/BurntSushi/toml"
 )
 
+var fileName = "test_file.toml"
+
+func createTomlFile() string {
+	path, err1 := os.Getwd()
+	if err1 != nil {
+		panic(err1)
+	}
+
+	file := path + "/" + fileName
+
+	f, err2 := os.Create(path + "/" + fileName)
+	if err2 != nil {
+		panic(err2)
+	}
+
+	d := []byte("[phone]\n\"en-AU\" = [\"0487439000\", \"+61487439000\"]\n\n[name]\n\"en-AU\" = [\"John Richards\", \"Danielle Wong\"]")
+	_, err3 := f.Write(d)
+	if err3 != nil {
+		panic(err3)
+	}
+
+	return file
+}
+
+func removeTomlFile() {
+	path, err1 := os.Getwd()
+	if err1 != nil {
+		panic(err1)
+	}
+
+	os.Remove(path + "/" + fileName)
+}
+
+// test the default supplied 'entities.toml' file
 func TestEntitiesToml(t *testing.T) {
 	var config Config
 	f := "entities.toml"
@@ -28,6 +64,59 @@ func TestEntitiesToml(t *testing.T) {
 	match, _ := regexp.MatchString("^0[0-9]+", config.Phone.ENAU[0])
 	if !match {
 		t.Errorf("config.Phone.EnAU[0] expected phone number got: %s", config.Phone.ENAU[0])
+	}
+}
+
+func TestGetEntities(t *testing.T) {
+	file := createTomlFile()
+
+	entities, err := getEntities(file)
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	if entities["Name"]["ENAU"] == nil {
+		t.Errorf("Could not find expected entity in toml file [\"Name\"][\"ENAU\"]")
+	}
+
+	removeTomlFile()
+}
+
+func TestGetEntityNames(t *testing.T) {
+	entities := map[string]map[string][]string{"Name": {"ENAU": []string{"john"}}, "Phone": {"ENAU": []string{"0487439000"}}}
+	entityNames := getEntityNames(entities)
+	expected := []string{"Name", "Phone"}
+
+	if !reflect.DeepEqual(entityNames, expected) {
+		t.Errorf("Expected: '%s' , got: %s", entityNames, expected)
+	}
+}
+
+func TestGetRandomItemIndex(t *testing.T) {
+	entitiesIndexCache := make(map[string]map[int]bool)
+	s := make(map[int]bool)
+
+	index1 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
+	index2 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
+	index3 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
+	index4 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
+
+	s[index1] = true
+	s[index2] = true
+	s[index3] = true
+	s[index4] = true
+
+	if len(s) != 4 {
+		t.Errorf("expected map with four unique keys. Got: %#v", s)
+	}
+}
+
+func TestFormatLocale(t *testing.T) {
+	converted := formatLocale("en-AU")
+
+	if converted != "ENAU" {
+		t.Errorf("expected 'ENAU' got: %s", converted)
 	}
 }
 

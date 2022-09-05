@@ -1,3 +1,5 @@
+# When editing the contents of this file, TestEntitiesToml may need to be updated
+
 [phone]
 "en-AU" = ["0487439000", "+61487439000", "0487 439 000"]
 

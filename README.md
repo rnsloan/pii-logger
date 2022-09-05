@@ -18,9 +18,9 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 ## TODO?
 
+- configure what entities to use
 - format entities e.g '04## ### ###'
 - natural language
-- reduce repeating the same entities
 ## Entities
 
 [https://cloud.google.com/dialogflow/es/docs/reference/system-entities](https://cloud.google.com/dialogflow/es/docs/reference/system-entities)
