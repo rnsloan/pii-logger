@@ -13,7 +13,7 @@ import (
 type Entities = map[string]map[string][]string
 type EntitiesIndexCache = map[string]map[int]bool
 
-type Config struct {
+type TomlEntities struct {
 	Phone struct {
 		Locale
 	}
@@ -23,9 +23,9 @@ type Config struct {
 }
 
 // https://stackoverflow.com/a/42849112
-func structToMap(config Config) (Entities, error) {
+func structToMap(entities TomlEntities) (Entities, error) {
 	var myMap map[string]map[string][]string
-	data, err := json.Marshal(config)
+	data, err := json.Marshal(entities)
 
 	if err != nil {
 		return nil, err
@@ -36,20 +36,20 @@ func structToMap(config Config) (Entities, error) {
 }
 
 func getEntities(entitiesFilePath string) (Entities, error) {
-	var config Config
+	var tomlEntities TomlEntities
 	_, err := os.Open(entitiesFilePath)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_, error := toml.DecodeFile(entitiesFilePath, &config)
+	_, error := toml.DecodeFile(entitiesFilePath, &tomlEntities)
 
 	if error != nil {
 		return nil, error
 	}
 
-	entities, error := structToMap(config)
+	entities, error := structToMap(tomlEntities)
 
 	if error != nil {
 		return nil, error

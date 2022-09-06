@@ -52,7 +52,7 @@ func removeTomlFile() {
 
 // test the default supplied 'entities.toml' file
 func TestEntitiesToml(t *testing.T) {
-	var config Config
+	var config TomlEntities
 	f := "entities.toml"
 
 	entities, err := toml.DecodeFile(f, &config)
