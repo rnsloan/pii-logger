@@ -10,7 +10,7 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 
 `--delay` the time in seconds between outputs. Default: `5`
 `--locale` the time between outputs. Default: `en-AU`
-`--entitiesFilePath` the time between outputs. Default: `./pkg/pii/entities.toml`
+`--entitiesFilePath` path to the entities file. Any table header, e.g. `[phone]`, that does not exist in the default file will be ignored. Default: `./pkg/pii/entities.toml`
 
 ## Development
 

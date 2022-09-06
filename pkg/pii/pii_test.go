@@ -113,10 +113,16 @@ func TestGetRandomItemIndex(t *testing.T) {
 }
 
 func TestFormatLocale(t *testing.T) {
-	converted := formatLocale("en-AU")
-
-	if converted != "ENAU" {
-		t.Errorf("expected 'ENAU' got: %s", converted)
+	for _, c := range []struct {
+		in, want string
+	}{
+		{"en-AU", "ENAU"},
+		{"ha-Latn-NG", "HALATNNG"},
+	} {
+		got := formatLocale(c.in)
+		if got != c.want {
+			t.Errorf("formatLocale(%q) == %q, want %q", c.in, got, c.want)
+		}
 	}
 }
 

@@ -12,9 +12,6 @@ import (
 
 type Entities = map[string]map[string][]string
 type EntitiesIndexCache = map[string]map[int]bool
-type Locale struct {
-	ENAU []string `toml:"en-AU"`
-}
 
 type Config struct {
 	Phone struct {
