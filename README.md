@@ -2,6 +2,8 @@
 
 To test Personally Identifiable Information redacting in logs. Go ports of the [faker library](https://github.com/faker-js/faker) have limited locale support.
 
+The Entities toml file supports reverse regular expression generation using the [regenerator package](https://pkg.go.dev/github.com/zach-klippenstein/goregen). Wrap the regular expression in `/` characters e.g. `"/04[0-9]{8}/"`.
+
 ## Usage
 
 `go run ./cmd/main.go`
@@ -15,15 +17,16 @@ To test Personally Identifiable Information redacting in logs. Go ports of the [
 `--entitiesFilePath` path to the entities file. Any table header, e.g. `[phone]`, that does not exist in the default file will be ignored. Default: `./pkg/pii/entities.toml`
 
 `--specificEntities` specific entities to use e.g. `name,IPAddress`. Default: `all`
+
 ## Development
 
 `go test ./...`
 
 ## TODO?
 
-- format entities e.g '04## ### ###'
 - natural language
 - add more entities to default file
+
 ## Entities
 
 [https://cloud.google.com/dialogflow/es/docs/reference/system-entities](https://cloud.google.com/dialogflow/es/docs/reference/system-entities)

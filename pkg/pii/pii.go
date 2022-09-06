@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	regen "github.com/zach-klippenstein/goregen"
 )
 
 const All = "all"
@@ -26,6 +27,21 @@ type TomlEntities struct {
 	IPAddress struct {
 		Locale
 	}
+}
+
+// https://stackoverflow.com/a/56129336
+func substr(input string, start int, length int) string {
+	asRunes := []rune(input)
+
+	if start >= len(asRunes) {
+		return ""
+	}
+
+	if start+length > len(asRunes) {
+		length = len(asRunes) - start
+	}
+
+	return string(asRunes[start : start+length])
 }
 
 // https://stackoverflow.com/a/42849112
@@ -132,6 +148,17 @@ func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesIte
 	}
 }
 
+func generateEntityItem(item string) (string, error) {
+	regex := substr(item, 1, len(item)-2)
+	regexItem, err := regen.Generate(regex)
+
+	if err != nil {
+		return "", err
+	}
+
+	return regexItem, nil
+}
+
 func Initilise(entitiesFilePath, loc string, specificEntities string) func() (string, error) {
 	var entitiesCache Entities
 	var entitiesNameCache []string
@@ -175,7 +202,13 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 		}
 
 		itemIndex := getRandomItemIndex(entitiesIndexCache, randomEntity, len(entityItems))
+		item := entityItems[itemIndex]
 
-		return entityItems[itemIndex], nil
+		// 47 = '/'
+		if item[0] == 47 && item[len(item)-1] == 47 {
+			return generateEntityItem(item)
+		}
+
+		return item, nil
 	}
 }

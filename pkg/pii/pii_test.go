@@ -5,6 +5,7 @@ import (
 	//"reflect"
 	//"regexp"
 
+	"fmt"
 	"os"
 	"reflect"
 	"regexp"
@@ -39,7 +40,6 @@ func createTomlFile() string {
 	}
 
 	toml := `
-
 [phone]
 "en-AU" = ["0487439000", "+61487439000", "0487 439 000"]
 
@@ -84,7 +84,7 @@ func TestEntitiesToml(t *testing.T) {
 
 	for _, v := range entityNames {
 		if !entities.IsDefined(v) {
-			t.Errorf("Could not find entity: '%s' in entities file", v)
+			t.Errorf("could not find entity: '%s' in entities file", v)
 		}
 	}
 
@@ -104,7 +104,7 @@ func TestGetEntities(t *testing.T) {
 	}
 
 	if entities["Name"]["ENAU"] == nil {
-		t.Errorf("Could not find expected entity in toml file [\"Name\"][\"ENAU\"]")
+		t.Errorf("could not find expected entity in toml file [\"Name\"][\"ENAU\"]")
 	}
 
 	removeTomlFile()
@@ -123,17 +123,17 @@ func TestGetEntityNames(t *testing.T) {
 	} {
 		got := contains(entityNames, c.in)
 		if !got {
-			t.Errorf("Could not find (%q) in %q", c.in, entityNames)
+			t.Errorf("could not find (%q) in %q", c.in, entityNames)
 		}
 	}
 
-	if !reflect.DeepEqual(entityNames, expected) {
-		t.Errorf("Expected: '%s' , got: %s", entityNames, expected)
+	if !contains(entityNames, expected[0]) || !contains(entityNames, expected[1]) {
+		t.Errorf("expected: '%s' , got: %s", entityNames, expected)
 	}
 
 	entityNamesWithExclusion := getEntityNames(entities, "name")
 	if !reflect.DeepEqual(entityNamesWithExclusion, []string{"Name"}) {
-		t.Errorf("Expected entity 'phone' to be excluded. Found: %s", entityNamesWithExclusion)
+		t.Errorf("expected entity 'phone' to be excluded. Found: %s", entityNamesWithExclusion)
 	}
 }
 
@@ -167,6 +167,21 @@ func TestFormatLocale(t *testing.T) {
 		if got != c.want {
 			t.Errorf("formatLocale(%q) == %q, want %q", c.in, got, c.want)
 		}
+	}
+}
+
+func TestGenerateEntityItem(t *testing.T) {
+	reg := "04[0-9]{8}"
+	item, err := generateEntityItem(fmt.Sprintf("/%s/", reg))
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	match, _ := regexp.MatchString(reg, item)
+
+	if !match {
+		t.Errorf("expected %s to match the regular expression: %s", item, reg)
 	}
 }
 
