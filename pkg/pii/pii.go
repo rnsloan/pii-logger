@@ -2,6 +2,7 @@ package pii
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"os"
 	"strings"
@@ -18,6 +19,9 @@ type TomlEntities struct {
 		Locale
 	}
 	Name struct {
+		Locale
+	}
+	IPAddress struct {
 		Locale
 	}
 }
@@ -91,6 +95,7 @@ func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesIte
 
 	index := r.Intn(entitiesItemLength)
 
+	// check if the index has been used already
 	if _, ok := cache[entityName][index]; !ok {
 		cache[entityName][index] = true
 		return index
@@ -120,10 +125,27 @@ func Initilise(entitiesFilePath, loc string) func() (string, error) {
 			entitiesNameCache = getEntityNames(entitiesCache)
 		}
 
-		entityIndex := r.Intn(len(entitiesNameCache))
-		randomEntity := entitiesNameCache[entityIndex]
+		var randomEntity string
+		var entityItems []string
+		entityHasItems := false
+		circuitBreaker := 0
 
-		entityItems := entitiesCache[randomEntity][locale]
+		// using the supplied locale, find an entity with items
+		for !entityHasItems {
+			index := r.Intn(len(entitiesNameCache))
+			randomEntity = entitiesNameCache[index]
+			entityItems = entitiesCache[randomEntity][locale]
+
+			if len(entityItems) > 0 {
+				entityHasItems = true
+			}
+
+			circuitBreaker++
+			if circuitBreaker == 1000 {
+				return "", fmt.Errorf("using locale: %s , could not find an Entity with items. Check the toml file", locale)
+			}
+		}
+
 		itemIndex := getRandomItemIndex(entitiesIndexCache, randomEntity, len(entityItems))
 
 		return entityItems[itemIndex], nil

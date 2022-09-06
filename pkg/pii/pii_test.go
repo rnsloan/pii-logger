@@ -1,15 +1,28 @@
 package pii
 
 import (
+	//"os"
+	//"reflect"
+	//"regexp"
 	"os"
 	"reflect"
 	"regexp"
 	"testing"
 
 	"github.com/BurntSushi/toml"
+	//"github.com/BurntSushi/toml"
 )
 
 var fileName = "test_file.toml"
+
+func contains[K comparable](s []K, e K) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
 
 func createTomlFile() string {
 	path, err1 := os.Getwd()
@@ -25,11 +38,15 @@ func createTomlFile() string {
 	}
 
 	toml := `
+
 [phone]
 "en-AU" = ["0487439000", "+61487439000", "0487 439 000"]
 
 [name]
 "en-AU" = ["John Richards", "Danielle Wong"]
+
+[IPAddress]
+"en-AU" = ["47.124.160.94", "135.34.220.4"]
 `
 
 	d := []byte(toml)
@@ -51,6 +68,7 @@ func removeTomlFile() {
 }
 
 // test the default supplied 'entities.toml' file
+
 func TestEntitiesToml(t *testing.T) {
 	var config TomlEntities
 	f := "entities.toml"
@@ -95,6 +113,18 @@ func TestGetEntityNames(t *testing.T) {
 	entities := map[string]map[string][]string{"Name": {"ENAU": []string{"john"}}, "Phone": {"ENAU": []string{"0487439000"}}}
 	entityNames := getEntityNames(entities)
 	expected := []string{"Name", "Phone"}
+
+	for _, c := range []struct {
+		in string
+	}{
+		{"Name"},
+		{"Phone"},
+	} {
+		got := contains(entityNames, c.in)
+		if !got {
+			t.Errorf("Could not find (%q) in %q", c.in, entityNames)
+		}
+	}
 
 	if !reflect.DeepEqual(entityNames, expected) {
 		t.Errorf("Expected: '%s' , got: %s", entityNames, expected)
