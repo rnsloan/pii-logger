@@ -4,6 +4,7 @@ import (
 	//"os"
 	//"reflect"
 	//"regexp"
+
 	"os"
 	"reflect"
 	"regexp"
@@ -111,7 +112,7 @@ func TestGetEntities(t *testing.T) {
 
 func TestGetEntityNames(t *testing.T) {
 	entities := map[string]map[string][]string{"Name": {"ENAU": []string{"john"}}, "Phone": {"ENAU": []string{"0487439000"}}}
-	entityNames := getEntityNames(entities)
+	entityNames := getEntityNames(entities, All)
 	expected := []string{"Name", "Phone"}
 
 	for _, c := range []struct {
@@ -128,6 +129,11 @@ func TestGetEntityNames(t *testing.T) {
 
 	if !reflect.DeepEqual(entityNames, expected) {
 		t.Errorf("Expected: '%s' , got: %s", entityNames, expected)
+	}
+
+	entityNamesWithExclusion := getEntityNames(entities, "name")
+	if !reflect.DeepEqual(entityNamesWithExclusion, []string{"Name"}) {
+		t.Errorf("Expected entity 'phone' to be excluded. Found: %s", entityNamesWithExclusion)
 	}
 }
 
@@ -165,7 +171,7 @@ func TestFormatLocale(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	write := Initilise("entities.toml", "en-AU")
+	write := Initilise("entities.toml", "en-AU", All)
 
 	_, err := write()
 

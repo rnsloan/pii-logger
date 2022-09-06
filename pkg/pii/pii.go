@@ -11,6 +11,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const All = "all"
+
 type Entities = map[string]map[string][]string
 type EntitiesIndexCache = map[string]map[int]bool
 
@@ -62,14 +64,40 @@ func getEntities(entitiesFilePath string) (Entities, error) {
 	return entities, nil
 }
 
-func getEntityNames(entities Entities) []string {
-	entityNames := make([]string, len(entities))
+func getEntityNames(entities Entities, specificEntities string) []string {
+	entityAllowList := []string{}
+
+	contains := func(sl []string, item string) bool {
+		for i := range sl {
+			if strings.EqualFold(sl[i], item) {
+				return true
+			}
+		}
+		return false
+	}
+
+	if specificEntities != All {
+		if strings.Contains(specificEntities, ",") {
+			entityAllowList = strings.Split(specificEntities, ",")
+		} else {
+			entityAllowList = []string{specificEntities}
+		}
+	}
+
+	entityNames := []string{}
 
 	i := 0
 	for k := range entities {
-		entityNames[i] = k
+		if len(entityAllowList) > 0 {
+			if contains(entityAllowList, k) {
+				entityNames = append(entityNames, k)
+			}
+		} else {
+			entityNames = append(entityNames, k)
+		}
 		i++
 	}
+
 	return entityNames
 }
 
@@ -104,7 +132,7 @@ func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesIte
 	}
 }
 
-func Initilise(entitiesFilePath, loc string) func() (string, error) {
+func Initilise(entitiesFilePath, loc string, specificEntities string) func() (string, error) {
 	var entitiesCache Entities
 	var entitiesNameCache []string
 	entitiesIndexCache := make(map[string]map[int]bool)
@@ -122,7 +150,7 @@ func Initilise(entitiesFilePath, loc string) func() (string, error) {
 			}
 
 			entitiesCache = entities
-			entitiesNameCache = getEntityNames(entitiesCache)
+			entitiesNameCache = getEntityNames(entitiesCache, specificEntities)
 		}
 
 		var randomEntity string
@@ -141,7 +169,7 @@ func Initilise(entitiesFilePath, loc string) func() (string, error) {
 			}
 
 			circuitBreaker++
-			if circuitBreaker == 1000 {
+			if circuitBreaker == 10000 {
 				return "", fmt.Errorf("using locale: %s , could not find an Entity with items. Check the toml file", locale)
 			}
 		}
