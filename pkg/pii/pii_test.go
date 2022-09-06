@@ -24,7 +24,15 @@ func createTomlFile() string {
 		panic(err2)
 	}
 
-	d := []byte("[phone]\n\"en-AU\" = [\"0487439000\", \"+61487439000\"]\n\n[name]\n\"en-AU\" = [\"John Richards\", \"Danielle Wong\"]")
+	toml := `
+[phone]
+"en-AU" = ["0487439000", "+61487439000", "0487 439 000"]
+
+[name]
+"en-AU" = ["John Richards", "Danielle Wong"]
+`
+
+	d := []byte(toml)
 	_, err3 := f.Write(d)
 	if err3 != nil {
 		panic(err3)
