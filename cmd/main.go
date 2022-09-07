@@ -19,21 +19,21 @@ func main() {
 
 	write := pii.Initilise(*entitiesFilePath, *locale, *specificEntities)
 
-	item, err := write()
+	value, err := write()
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
-	fmt.Println(item)
+	fmt.Println(value)
 
 	for range ticker.C {
-		item, err := write()
+		value, err := write()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		fmt.Println(item)
+		fmt.Println(value)
 	}
 }

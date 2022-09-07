@@ -131,14 +131,14 @@ func TestGetEntityNames(t *testing.T) {
 	}
 }
 
-func TestGetRandomItemIndex(t *testing.T) {
+func TestGetRandomValueIndex(t *testing.T) {
 	entitiesIndexCache := make(map[string]map[int]bool)
 	s := make(map[int]bool)
 
-	index1 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
-	index2 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
-	index3 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
-	index4 := getRandomItemIndex(entitiesIndexCache, "Name", 6)
+	index1 := getRandomValueIndex(entitiesIndexCache, "Name", 6)
+	index2 := getRandomValueIndex(entitiesIndexCache, "Name", 6)
+	index3 := getRandomValueIndex(entitiesIndexCache, "Name", 6)
+	index4 := getRandomValueIndex(entitiesIndexCache, "Name", 6)
 
 	s[index1] = true
 	s[index2] = true
@@ -164,18 +164,18 @@ func TestFormatLocale(t *testing.T) {
 	}
 }
 
-func TestGenerateEntityItem(t *testing.T) {
+func TestGenerateEntityValue(t *testing.T) {
 	reg := "04[0-9]{8}"
-	item, err := generateEntityItem(fmt.Sprintf("/%s/", reg))
+	value, err := generateEntityValue(fmt.Sprintf("/%s/", reg))
 
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 
-	match, _ := regexp.MatchString(reg, item)
+	match, _ := regexp.MatchString(reg, value)
 
 	if !match {
-		t.Errorf("expected %s to match the regular expression: %s", item, reg)
+		t.Errorf("expected %s to match the regular expression: %s", value, reg)
 	}
 }
 

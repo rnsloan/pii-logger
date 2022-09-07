@@ -124,7 +124,7 @@ func formatLocale(locale string) string {
 	return converted
 }
 
-func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesItemLength int) int {
+func getRandomValueIndex(cache EntitiesIndexCache, entityName string, entitiesValuesLength int) int {
 	source := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(source)
 
@@ -132,31 +132,31 @@ func getRandomItemIndex(cache EntitiesIndexCache, entityName string, entitiesIte
 		cache[entityName] = make(map[int]bool)
 	}
 
-	// clear cache if it contains 75%+ of available entity items
-	if float32(len(cache[entityName]))/float32(entitiesItemLength) >= .75 {
+	// clear cache if it contains 75%+ of available entity values
+	if float32(len(cache[entityName]))/float32(entitiesValuesLength) >= .75 {
 		cache[entityName] = make(map[int]bool)
 	}
 
-	index := r.Intn(entitiesItemLength)
+	index := r.Intn(entitiesValuesLength)
 
 	// check if the index has been used already
 	if _, ok := cache[entityName][index]; !ok {
 		cache[entityName][index] = true
 		return index
 	} else {
-		return getRandomItemIndex(cache, entityName, entitiesItemLength)
+		return getRandomValueIndex(cache, entityName, entitiesValuesLength)
 	}
 }
 
-func generateEntityItem(item string) (string, error) {
-	regex := substr(item, 1, len(item)-2)
-	regexItem, err := regen.Generate(regex)
+func generateEntityValue(value string) (string, error) {
+	regex := substr(value, 1, len(value)-2)
+	regexValue, err := regen.Generate(regex)
 
 	if err != nil {
 		return "", err
 	}
 
-	return regexItem, nil
+	return regexValue, nil
 }
 
 func Initilise(entitiesFilePath, loc string, specificEntities string) func() (string, error) {
@@ -181,34 +181,34 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 		}
 
 		var randomEntity string
-		var entityItems []string
-		entityHasItems := false
+		var entityValues []string
+		entityHasValues := false
 		circuitBreaker := 0
 
 		// using the supplied locale, find an entity with items
-		for !entityHasItems {
+		for !entityHasValues {
 			index := r.Intn(len(entitiesNameCache))
 			randomEntity = entitiesNameCache[index]
-			entityItems = entitiesCache[randomEntity][locale]
+			entityValues = entitiesCache[randomEntity][locale]
 
-			if len(entityItems) > 0 {
-				entityHasItems = true
+			if len(entityValues) > 0 {
+				entityHasValues = true
 			}
 
 			circuitBreaker++
 			if circuitBreaker == 10000 {
-				return "", fmt.Errorf("using locale: %s , could not find an Entity with items. Check the toml file", locale)
+				return "", fmt.Errorf("using locale: %s , could not find an Entity with values. Check the toml file", locale)
 			}
 		}
 
-		itemIndex := getRandomItemIndex(entitiesIndexCache, randomEntity, len(entityItems))
-		item := entityItems[itemIndex]
+		valueIndex := getRandomValueIndex(entitiesIndexCache, randomEntity, len(entityValues))
+		value := entityValues[valueIndex]
 
 		// 47 = '/'
-		if item[0] == 47 && item[len(item)-1] == 47 {
-			return generateEntityItem(item)
+		if value[0] == 47 && value[len(value)-1] == 47 {
+			return generateEntityValue(value)
 		}
 
-		return item, nil
+		return value, nil
 	}
 }
