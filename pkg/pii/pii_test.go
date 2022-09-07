@@ -1,10 +1,6 @@
 package pii
 
 import (
-	//"os"
-	//"reflect"
-	//"regexp"
-
 	"fmt"
 	"os"
 	"reflect"
@@ -12,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	//"github.com/BurntSushi/toml"
 )
 
 var fileName = "test_file.toml"
@@ -88,9 +83,8 @@ func TestEntitiesToml(t *testing.T) {
 		}
 	}
 
-	match, _ := regexp.MatchString("^0[0-9]+", config.Phone.ENAU[0])
-	if !match {
-		t.Errorf("config.Phone.EnAU[0] expected phone number got: %s", config.Phone.ENAU[0])
+	if len(config.Phone.ENAU) < 1 {
+		t.Errorf("config.Phone.EnAU expected slice got: %s", config.Phone.ENAU)
 	}
 }
 
