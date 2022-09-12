@@ -8,7 +8,9 @@ The Entities toml file has support for reverse regular expression generation usi
 
 ## Usage
 
-`go run ./cmd/main.go`
+Download the appropriate executable from the releases page [https://github.com/rnsloan/pii-logger/releases](https://github.com/rnsloan/pii-logger/releases).
+
+`./pii-logger`
 
 ### Commands
 
