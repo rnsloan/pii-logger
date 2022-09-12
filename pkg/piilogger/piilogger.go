@@ -1,6 +1,7 @@
-package pii
+package piilogger
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -13,20 +14,32 @@ import (
 )
 
 const All = "all"
+const DefaultFilePath = "./pkg/pii/entities.toml"
 
-type Entities = map[string]map[string][]string
+//go:embed entities.toml
+var entities []byte
+
+type Entities = map[string]map[string]map[string][]string
 type EntitiesIndexCache = map[string]map[int]bool
 
 type TomlEntities struct {
-	Phone struct {
-		Locale
-	}
-	Name struct {
-		Locale
-	}
-	IPAddress struct {
-		Locale
-	}
+	Phone               Locale
+	Name                Locale
+	IPAddress           Locale
+	Email               Locale
+	Religion            Locale
+	CreditCard          Locale
+	MedicalCard         Locale
+	DriversLicence      Locale
+	VehicleRegistration Locale
+	PinNumber           Locale
+	LoyaltyCard         Locale
+	Gender              Locale
+	Password            Locale
+	Time                Locale
+	Date                Locale
+	Address             Locale
+	Currency            Locale
 }
 
 // https://stackoverflow.com/a/56129336
@@ -46,7 +59,7 @@ func substr(input string, start int, length int) string {
 
 // https://stackoverflow.com/a/42849112
 func structToMap(entities TomlEntities) (Entities, error) {
-	var myMap map[string]map[string][]string
+	var myMap Entities
 	data, err := json.Marshal(entities)
 
 	if err != nil {
@@ -54,18 +67,14 @@ func structToMap(entities TomlEntities) (Entities, error) {
 	}
 
 	json.Unmarshal(data, &myMap)
+
 	return myMap, nil
 }
 
-func getEntities(entitiesFilePath string) (Entities, error) {
+func getEntities(rawToml string) (Entities, error) {
 	var tomlEntities TomlEntities
-	_, err := os.Open(entitiesFilePath)
 
-	if err != nil {
-		return nil, err
-	}
-
-	_, error := toml.DecodeFile(entitiesFilePath, &tomlEntities)
+	_, error := toml.Decode(rawToml, &tomlEntities)
 
 	if error != nil {
 		return nil, error
@@ -148,7 +157,7 @@ func getRandomValueIndex(cache EntitiesIndexCache, entityName string, entitiesVa
 	}
 }
 
-func generateEntityValue(value string) (string, error) {
+func generateEntityValueFromRegEx(value string) (string, error) {
 	regex := substr(value, 1, len(value)-2)
 	regexValue, err := regen.Generate(regex)
 
@@ -159,7 +168,7 @@ func generateEntityValue(value string) (string, error) {
 	return regexValue, nil
 }
 
-func Initilise(entitiesFilePath, loc string, specificEntities string) func() (string, error) {
+func Initilise(entitiesFilePath, loc string, specificEntities string, useSentences string) func() (string, error) {
 	var entitiesCache Entities
 	var entitiesNameCache []string
 	entitiesIndexCache := make(map[string]map[int]bool)
@@ -170,13 +179,21 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 		r := rand.New(source)
 
 		if len(entitiesCache) == 0 || len(entitiesNameCache) == 0 {
-			entities, err := getEntities(entitiesFilePath)
+			if entitiesFilePath != DefaultFilePath {
+				f, e := os.ReadFile(entitiesFilePath)
+				if e != nil {
+					panic(e)
+				}
+				entities = f
+			}
+
+			parsedEntities, err := getEntities(string(entities))
 
 			if err != nil {
 				return "", err
 			}
 
-			entitiesCache = entities
+			entitiesCache = parsedEntities
 			entitiesNameCache = getEntityNames(entitiesCache, specificEntities)
 		}
 
@@ -189,7 +206,7 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 		for !entityHasValues {
 			index := r.Intn(len(entitiesNameCache))
 			randomEntity = entitiesNameCache[index]
-			entityValues = entitiesCache[randomEntity][locale]
+			entityValues = entitiesCache[randomEntity][locale]["Values"]
 
 			if len(entityValues) > 0 {
 				entityHasValues = true
@@ -197,7 +214,7 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 
 			circuitBreaker++
 			if circuitBreaker == 10000 {
-				return "", fmt.Errorf("using locale: %s , could not find an Entity with values. Check the toml file", locale)
+				return "", fmt.Errorf("using locale: %s, could not find an Entity with values. Check the toml file", locale)
 			}
 		}
 
@@ -206,7 +223,23 @@ func Initilise(entitiesFilePath, loc string, specificEntities string) func() (st
 
 		// 47 = '/'
 		if value[0] == 47 && value[len(value)-1] == 47 {
-			return generateEntityValue(value)
+			val, err2 := generateEntityValueFromRegEx(value)
+
+			if err2 != nil {
+				return "", err2
+			}
+
+			value = val
+		}
+
+		sentences := entitiesCache[randomEntity][locale]["Sentences"]
+
+		if useSentences != "no" && len(sentences) > 0 {
+			if useSentences == "always" || (useSentences == "yes" && r.Intn(2) > 0) {
+				idx := r.Intn(len(sentences))
+				randomNLItem := sentences[idx]
+				return strings.ReplaceAll(randomNLItem, "%s", value), nil
+			}
 		}
 
 		return value, nil

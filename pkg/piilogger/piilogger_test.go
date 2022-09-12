@@ -1,16 +1,26 @@
-package pii
+package piilogger
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/BurntSushi/toml"
 )
 
-var fileName = "test_file.toml"
+var rawToml = `
+[phone]
+en-AU.values = ["0487439000", "+61487439000", "0487 439 000"]
+en-AU.sentences = ["my phone number is %s."]
+
+[name]
+en-AU.values = ["John Richards", "Danielle Wong"]
+
+[IPAddress]
+en-AU.values = ["47.124.160.94", "135.34.220.4"]
+`
 
 func contains[K comparable](s []K, e K) bool {
 	for _, a := range s {
@@ -21,50 +31,17 @@ func contains[K comparable](s []K, e K) bool {
 	return false
 }
 
-func createTomlFile() string {
-	path, err1 := os.Getwd()
-	if err1 != nil {
-		panic(err1)
+func TestWrite(t *testing.T) {
+	write := Initilise("entities.toml", "en-AU", All, "no")
+
+	_, err := write()
+
+	if err != nil {
+		t.Errorf("%v", err)
 	}
-
-	file := path + "/" + fileName
-
-	f, err2 := os.Create(path + "/" + fileName)
-	if err2 != nil {
-		panic(err2)
-	}
-
-	toml := `
-[phone]
-"en-AU" = ["0487439000", "+61487439000", "0487 439 000"]
-
-[name]
-"en-AU" = ["John Richards", "Danielle Wong"]
-
-[IPAddress]
-"en-AU" = ["47.124.160.94", "135.34.220.4"]
-`
-
-	d := []byte(toml)
-	_, err3 := f.Write(d)
-	if err3 != nil {
-		panic(err3)
-	}
-
-	return file
-}
-
-func removeTomlFile() {
-	path, err1 := os.Getwd()
-	if err1 != nil {
-		panic(err1)
-	}
-
-	os.Remove(path + "/" + fileName)
 }
 
 // test the default supplied 'entities.toml' file
-
 func TestEntitiesToml(t *testing.T) {
 	var config TomlEntities
 	f := "entities.toml"
@@ -83,29 +60,25 @@ func TestEntitiesToml(t *testing.T) {
 		}
 	}
 
-	if len(config.Phone.ENAU) < 1 {
+	if len(config.Phone.ENAU.Values) < 1 {
 		t.Errorf("config.Phone.EnAU expected slice got: %s", config.Phone.ENAU)
 	}
 }
 
 func TestGetEntities(t *testing.T) {
-	file := createTomlFile()
-
-	entities, err := getEntities(file)
+	entities, err := getEntities(rawToml)
 
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 
-	if entities["Name"]["ENAU"] == nil {
-		t.Errorf("could not find expected entity in toml file [\"Name\"][\"ENAU\"]")
+	if entities["Name"]["ENAU"]["Values"] == nil {
+		t.Errorf("could not find expected entity in toml file [\"Name\"][\"ENAU\"][\"Values\"]")
 	}
-
-	removeTomlFile()
 }
 
 func TestGetEntityNames(t *testing.T) {
-	entities := map[string]map[string][]string{"Name": {"ENAU": []string{"john"}}, "Phone": {"ENAU": []string{"0487439000"}}}
+	entities := map[string]map[string]map[string][]string{"Name": {"ENAU": {"Values": []string{"john"}}}, "Phone": {"ENAU": {"Values": []string{"0487439000"}}}}
 	entityNames := getEntityNames(entities, All)
 	expected := []string{"Name", "Phone"}
 
@@ -166,7 +139,7 @@ func TestFormatLocale(t *testing.T) {
 
 func TestGenerateEntityValue(t *testing.T) {
 	reg := "04[0-9]{8}"
-	value, err := generateEntityValue(fmt.Sprintf("/%s/", reg))
+	value, err := generateEntityValueFromRegEx(fmt.Sprintf("/%s/", reg))
 
 	if err != nil {
 		t.Errorf("%v", err)
@@ -179,12 +152,18 @@ func TestGenerateEntityValue(t *testing.T) {
 	}
 }
 
-func TestWrite(t *testing.T) {
-	write := Initilise("entities.toml", "en-AU", All)
+func TestSentences(t *testing.T) {
+	write := Initilise("entities.toml", "en-AU", All, "no")
+	out, _ := write()
 
-	_, err := write()
+	if strings.Contains(out, "my") {
+		t.Errorf("expected output to not be a sentence. Got: %s", out)
+	}
 
-	if err != nil {
-		t.Errorf("%v", err)
+	write2 := Initilise("entities.toml", "en-AU", "Phone", "always")
+	out2, _ := write2()
+
+	if !strings.Contains(out2, "number") {
+		t.Errorf("expected output to be a sentence. Got: %s", out2)
 	}
 }

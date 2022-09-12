@@ -1,0 +1,86 @@
+# When editing the contents of this file, TestEntitiesToml may need to be updated
+
+[phone]
+en-AU.values = ["/(\\+61|0)(4|2)[0-9]{2}( ){0,1}[0-9]{3}( ){0,1}[0-9]{3}/"]
+en-AU.sentences = ["my phone number is %s.", "the number is %s"]
+
+[name]
+en-AU.values = [
+  "John Richards",
+  "Danielle Wong",
+  "Xiu Lee",
+  "Amber",
+  "Rachael",
+  "anisha",
+  "tony",
+]
+en-AU.sentences = ["Hi my name is %s"]
+
+[IPAddress]
+en-AU.values = [
+  "/(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])/",
+]
+en-AU.sentences = ["They said my IP address is %s", "it is %s"]
+
+[email]
+en-AU.values = ["/([a-z]|[0-9]){5,10}@([a-z]|[0-9]){5,10}\\.[a-z]{2,3}/"]
+en-AU.sentences = ["the address is %s", "my email address is %s", "it is %s"]
+
+[religion]
+en-AU.values = [
+  "Christianity",
+  "christian",
+  "Islam",
+  "Islamic",
+  "hindu",
+  "Hinduism",
+  "buddhism",
+  "Buddhism",
+  "Sikhism",
+  "Sikh",
+  "Judaism",
+  "atheist",
+]
+en-AU.sentences = ["my religion is %s"]
+
+[creditCard]
+en-AU.values = [
+  "378282246310005",
+  "3714 4963 5398 431",
+  "5610-5910-8101-8250",
+  "5555555555554444",
+  "4111 1111 1111 1111",
+]
+en-AU.sentences = [
+  "my card number is %s",
+  "credit card: %s",
+  "my credit card is %s",
+  "the number is %s",
+]
+
+[medicalCard]
+en-AU.values = [
+  "/[2-6]{1}[0-9]{7}(1|3|7|9){1}[0-9]{1}[0-9]{1}/",
+  "/[2-6]{1}[0-9]{3} [0-9]{4}(1|3|7|9){1} ([0-9])?/",
+]
+en-AU.sentences = ["my medicare card is %s", "the medicare number %s"]
+
+[passport]
+en-AU.values = ["/[A-Za-z]( )?[A-Za-z0-9]{7}/"]
+en-AU.sentences = ["passport number %s"]
+
+[driversLicence]
+en-AU.values = [
+  "25230984",
+  "23-90-0987",
+  "23907654",
+  "45900987",
+  "46980987",
+  "67-78-8765",
+  "34 78 6785",
+  "23459876",
+  "78-98-2345",
+  "23 89 5674",
+  "45909087",
+]
+en-AU.sentences = ["my drivers licence number %s", "licence number: %s"]
