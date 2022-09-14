@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	piilogger "pii-logger/pkg/piilogger"
 	"time"
@@ -12,6 +14,12 @@ import (
 var Version = "development"
 
 func main() {
+	// http://localhost:6060/debug/pprof/heap
+	// top
+	go func() {
+		fmt.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	version := flag.Bool("version", false, "prints the application version then exits")
 	delay := flag.Int("delay", 5, "the time between outputs")
 	locale := flag.String("locale", "en-AU", "language locale")
