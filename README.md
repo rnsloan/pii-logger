@@ -2,17 +2,24 @@
 
 ![preview](https://user-images.githubusercontent.com/2513462/189565365-ffeed618-3058-406e-8970-be4374cb296d.gif)
 
-To test Personally Identifiable Information redacting in logs. Go ports of the [faker library](https://github.com/faker-js/faker) have limited locale support.
+To test Personally Identifiable Information redacting in logs.
 
-The Entities toml file has support for reverse regular expression generation using the [regenerator package](https://pkg.go.dev/github.com/zach-klippenstein/goregen). Wrap the regular expression in `/` characters e.g. `"/04[0-9]{8}/"`. Support is basic and it is advised to test regular expressions before using them as there are differences between standard re2 compatible regular expressions and those supported by this package.
+## Rationale:
+
+1. Go ports of the [faker library](https://github.com/faker-js/faker) have limited locale support
+2. To support Natural Language phrase output
 
 ## Usage
 
 Download the appropriate executable from the releases page [https://github.com/rnsloan/pii-logger/releases](https://github.com/rnsloan/pii-logger/releases).
 
-`./pii-logger`
+To run: `./pii-logger`.
 
-### Commands
+PII 'Entities' data is stored in a toml file. It comes with a default file: `pkg/pii/entities.toml`. An alternative file can be specified via a [flag option](#options).
+
+The entities file has support for reverse regular expression generation using the [regenerator package](https://pkg.go.dev/github.com/zach-klippenstein/goregen). To use, wrap the regular expression in `/` characters e.g. `"/04[0-9]{8}/"`. Support is basic and it is advised to test expressions with the regenerator package before usage as there are limitations with what the package can support versus the standard capabilities of a re2 regular expression.
+
+### Options
 
 `--delay` time in seconds between outputs. Default: `5`
 
@@ -54,6 +61,6 @@ Supported Entities:
 To build a new release:
 
 1. add a new git tag
-2. push the tag to github
+2. push the tag to GitHub
 3. `make release`
-4. create the new release in github and add the files in `/build` as assets
+4. create the new release in GitHub and add the files in `/build` generated from the previous step as assets
