@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rnsloan/pii-logger/pkg/piilogger"
 	"os"
-	piilogger "pii-logger/pkg/piilogger"
 	"time"
 )
 
